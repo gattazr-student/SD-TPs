@@ -1,0 +1,63 @@
+---
+title: "TP3"
+author: "Rémi GATTAZ"
+date: "23/11/2016"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+<!-- Load libraries -->
+```{r}
+library(cluster)
+
+X <- USArrests
+X <- dist(USArrests)
+```
+
+
+## kMeans
+3 classes
+```{r}
+ResKmean.3 <- kmeans(X, 3)
+ResKmean.3
+# with(X, pairs(X, color=c(1:3)[ResKmean.3$class]))
+```
+
+2 classes
+```{r}
+ResKmean.2 <- kmeans(X, 2)
+ResKmean.2
+```
+Le résultat est moins bon avec 2 classes (between_SS / total_SS est inférieur)
+
+
+## hclust
+```{r}
+ResHclust.complete <- hclust(dist(X), method="complete")
+ResHclust.avverage <- hclust(dist(X), method="average")
+ResHclust.single <- hclust(dist(X), method="single")
+ResHclust.cen <- hclust(dist(X), method="cen")
+```
+
+```{r}
+plot(ResHclust.complete, hang=-1)
+```
+
+Avec ce dendrogramme, il semblerait que un découpage en 3 classes puisse être aproprié.
+
+## pam
+Avec 2 classes
+```{r}
+resPam.2 <- pam(X, 2)
+plot(resPam.2)
+clusplot(resPam.2)
+```
+
+Avec 3 classes
+```{r}
+resPam.3 <- pam(X, 3)
+plot(resPam.3)
+clusplot(resPam.3)
+```
+C'est moin bien. La variable silhoute globale est inférieure.

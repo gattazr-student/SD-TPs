@@ -1,0 +1,125 @@
+---
+title: "TP4"
+author: "Rémi GATTAZ"
+date: "30/11/2016"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+```{r}
+library(cluster)
+library(rpart)
+library(ggplot2)
+SPAM7 <- read.table("spam7.txt")
+```
+
+## Partie 1 : Analyse non supervisée
+```{r}
+summary(SPAM7)
+spam.sample <- SPAM7[sample(seq(1,4601),500, replace=FALSE), ]
+par(mfrow=c(2,3))
+boxplot(split(spam.sample$crl.tot,spam.sample$yesno), main="crl.tot")
+boxplot(split(spam.sample$dollar,spam.sample$yesno), main="dollar")
+boxplot(split(spam.sample$bang,spam.sample$yesno), main="bang")
+boxplot(split(spam.sample$money,spam.sample$yesno), main="money")
+boxplot(split(spam.sample$n000,spam.sample$yesno), main="n000")
+boxplot(split(spam.sample$make,spam.sample$yesno), main="make")
+```
+
+
+### Kmeans
+```{r}
+SPAM6 <- SPAM7[,-7] # Enlève la colone 7 (yes/no)
+
+resKMeans <- lapply(c(1:10) , function(i) {
+    kmeans(SPAM6, centers = i)
+})
+resKMeans[1]
+resKMeans[1]$withinss
+# dfKmeans <- 
+
+#resKmean <- lapply(1:10, function(i) {
+#    kmeans(SPAM6, centers = i)
+#})
+#
+#resKmean[2][1]
+#centers %>% group_by(cluster) %>%
+#    do(data.frame(x1=rnorm(.$size[1], .$x1[1]),
+#                  x2=rnorm(.$size[1], .$x2[1])))
+#points.matrix <- cbind(x1 = points$x1, x2 = points$x2)
+#kclusts <- data.frame(k=1:9) %>% group_by(k) %>% do(kclust=kmeans(points.matrix, .$k))
+
+
+#dfresKmean <- sapply(resKmean, function(x) sum(x))
+#ggplot(data.frame(x = 1:10, y = resKmean.ss), aes(x, y)) +
+#        geom_point() + geom_line() +
+#        scale_x_continuous(breaks = 0:10)
+
+
+# plot(1:10, resKmean, type = "b", xlab = "Number of clusters", ylab = "Within SS")
+
+# ggplot(data.frame(cluster = 1:10, within.ss = res.within.ss), aes(cluster, within.ss)) +
+#    geom_point() + geom_line() +
+#    scale_x_continuous(breaks = 0:10)
+
+## SS for each cluster (1 cluster to 10 clusters)
+# lapply(resKmean, function(x) x$withinss)
+# res.within.ss <- sapply(resKmean, function(x) sum(x$withinss))
+# plot(1:10, res.within.ss, type = "b", xlab = "Number of clusters", ylab = "Within SS")
+
+# res.within.ss <- sapply(res.kmeans, function(x) sum(x$withinss)
+# ggplot(data.frame(cluster = 1:10, within.ss = res.within.ss), aes(cluster, within.ss)) +
+#  geom_point() + geom_line() +
+#    scale_x_continuous(breaks = 0:10)
+
+
+
+
+# resKmean = c();
+#resKmean[1] <- kmeans(SPAM6, 1)
+#plot(resKmean);
+
+#ggplot(data=SPAM6, aes(x=crl.tot, y=dollar) +
+#    xlab("label x") +
+#    ylab("label y") +
+#   theme_bw()
+
+
+#ResKmean.3 <- kmeans(SPAM6, 5)
+#ResKmean.3
+```
+
+## hclust
+```{r}
+distSPAM6 <- dist(SPAM6)
+#resHclust.complete <- hclust(distSPAM6, method="complete")
+#resHclust.average <- hclust(distSPAM6, method="average")
+#resHclust.single <- hclust(distSPAM6, method="single")
+#resHclust.cen <- hclust(distSPAM6, method="cen")
+```
+
+```{r}
+#plot(resHclust.complete, hang=-1)
+#plot(resHclust.average, hang=-1)
+#plot(resHclust.single, hang=-1)
+#plot(resHclust.cen, hang=-1)
+```
+
+## Partie 2 : Analyse supervisée
+
+```{r}
+S <- SPAM7
+sizeYes <- 0.8
+sizeNo <- 0.8
+subSample <- c(sample(1:max(which(S$yesno=="y")), round(sizeYes*max(which(S$yesno=="y")),digits=0)),
+               sample((max(which(S$yesno=="y"))+1):max(which(S$yesno=="n")),round(sizeNo*length(which(S$yesno=="n")),digits=0)))
+# Apprend yesno (yesno avant ~) avec toutes les autres variables (. après ~) avec l'ensemble subset
+fit <- rpart(S$yesno~ ., data=S, subset=subSample)
+
+fit
+
+plot(fit)
+text(fit)
+table(predict(fit, S[-subSample,], type="class"), S[-subSample, "yesno"])
+```

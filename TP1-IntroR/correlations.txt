@@ -1,0 +1,12 @@
+load MASS package
+library(MASS)
+cov<-matrix(c(2,sqrt(2),sqrt(2),2),2,2)
+w<-mvrnorm(10,c(5,3),cov)
+w<-data.frame(w)
+names(w)<-c("x","y")
+robs<-cor(w$x,w$y)
+plot(w$x,w$y,xlim=c(0,10),ylim=c(0,6),pch=20)
+lm0<-lm(y~x,data=w)
+abline(lm0,col="red",lwd=2)
+
+summary(lm0)$r.squared

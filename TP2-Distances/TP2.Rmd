@@ -1,0 +1,148 @@
+---
+title: "TP2"
+author: "Rémi GATTAZ"
+date: "16/11/2016"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+
+## EXPLORATION DES DONNEES
+
+### a)
+```{r}
+data(USArrests)
+
+label<-attributes(USArrests)$row.names
+boxplot(USArrests)
+plot(USArrests)
+```
+
+
+### corrélation entre Assaults et murder
+```{r}
+library(ggplot2)
+
+df1 <- data.frame(x=USArrests$Murder, y=USArrests$Assault)
+cor(df1$x, df1$y)
+```
+La valeur de corrélation est forte. Il y a une dépendance linéaire.
+```{r}
+ggplot(data=df1, aes(x=x, y=y)) +
+    xlab("Murder") +
+    ylab("Assaults") +
+    geom_point(alpha=0.2) + 
+    theme_bw() + 
+    geom_smooth(method="lm")
+```
+
+### corrélation entre UrbanPop et Murder
+```{r}
+df2 <- data.frame(x=USArrests$UrbanPop, y=USArrests$Murder)
+cor(df2$x, df2$y)
+```
+La valeur de corrélation est faible. Inutile de tenter de faire une régréssion linéaire.
+
+
+### corrélation entre Rape et Murder
+```{r}
+df3 <- data.frame(x=USArrests$Rape, y=USArrests$Murder)
+cor(df3$x, df3$y)
+```
+Il semblerait qu'il y a une dépendance linéaire.
+```{r}
+ggplot(data=df3, aes(x=x, y=y)) +
+    xlab("Rape") +
+    ylab("Murder") +
+    geom_point(alpha=.2) + 
+    theme_bw() + 
+    geom_smooth(method="lm")
+```
+
+## SIMILAIRES ET DIFFERENTS
+### a)
+```{r}
+# D est la matrice des distances eculidienne entre les états
+D = dist(USArrests, method = "euclidean", diag = FALSE, upper = FALSE, p = 2)
+attributes(D) # Affiche les informations globales sur D
+Dmat<-as.matrix(D) # Transforme en matrice
+Dmat[1:6,1:6]
+Dmat<-round(as.matrix(D),digits=0) # Arrondi toutes les valeurs de Dmat
+Dmat[1:6,1:6]
+```
+
+### b)
+```{r}
+min(round(D,digits=0))
+min(Dmat)
+```
+D est un objet alors que Dmat est une matrice. La fonction minimum sur l'objet n'est pas vraiment concluant :-)
+
+### c)
+```{r}
+Dmat<-as.matrix(D) # Transforme D en matrice
+(1:2500)[Dmat == min(D)] # Récupère les valeurs de Dmat aux positions où Dmin est minimisé
+col(Dmat)[Dmat == min(D)] # Récupère les colonnes à laquelle Dmat est minimisé dans D
+row(Dmat)[Dmat == min(D)] # Récupère les lignes à laquelle DMat est minimisé dans D
+USArrests[c(15,29),] # Affiche la valeur se trouvant à la cordonnée 15,29
+```
+
+### d)
+```{r}
+# En 1 ligne : Récupérer le max
+USArrests[col(Dmat)[Dmat == max(D)],]
+```
+
+## REPRESENTER LES DISTANCES
+
+### a)
+```{r}
+Cord<-cmdscale(D)
+Cord
+label<-attributes(Cord)$dimnames[[1]]
+plot(Cord, type="n")
+text(Cord,label)
+```
+
+### b)
+Sur cette projection, on voit que les états IOWA et New Hampshire sont très proche. Cela semble donc confirmer nos conclusions précédentes.
+
+### c)
+```{r}
+Cord3<-cmdscale(D, k=3)
+label3<-attributes(Cord3)$dimnames[[1]]
+plot(Cord3[,1],Cord3[,3], type="n")
+text(Cord3[,1],Cord3[,3],label3,cex=0.7)
+```
+
+On voit que des points proches dans la projection précédentes ne le sont pas dans cette nouvelle projection. Il faut donc faire attention au conclusion que l'on fait sur cette visualisation.
+
+## ANALYSE DES PREFERENCES
+
+### a)
+```{r}
+Pref<-read.table("PrefMusique.txt")
+Detud=dist(Pref, method = "euclidean", diag = FALSE, upper = FALSE, p = 2)
+```
+Les valeurs dans la matrice sont des valeurs norminales. Calculer une distrance euclidienne n'est donc pas correct.
+
+### b)
+```{r}
+rang<-t(apply(Pref,1,order))
+names<-c("U2","ABBA","HENDRIX","Chau noir","ZAPP A","DOORS","MARLEY","FERRE")
+DR<-dist(rang)
+attributes(DR)
+boxplot(rang, names=names)
+```
+
+### c)
+```{r}
+Detud=dist(rang, method = "euclidean", diag = FALSE, upper = FALSE, p = 2)
+Dmat<-as.matrix(Detud) # Transforme Dr en matrice
+rang[col(Dmat)[Dmat == min(Detud)],]
+```
+### d)
+
+
+
